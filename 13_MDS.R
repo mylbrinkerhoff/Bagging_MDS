@@ -11,8 +11,6 @@
 #   - Ensure all required packages are installed.
 #   - Modify the script as needed for your specific dataset and analysis requirements.
 
-install.packages("xtable")
-
 # Load required libraries
 library(dplyr) # For data manipulation
 library(vegan) # For MDS analysis
@@ -86,10 +84,7 @@ weights
 weights_raw = mds$species
 weights_raw
 
-install.packages("xtable")
-library(xtable)
-
-# Create a table of the MDS weights
+# Create a latex table of the MDS weights
 weights_table <- xtable(weights)
 weights_table
 print(weights_table, file = "weights_table.tex")

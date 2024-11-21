@@ -10,7 +10,7 @@
 
 ### install packages if not yet installed
 packages <- c("lme4","tidyverse","viridis", "rsample", "caret", "rpart", 
-              "ipred", "here", "reshape2", "vip", "randomForest")
+              "ipred", "here", "reshape2", "vip", "randomForest", "xtable", "vegan", "dbarts")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
   install.packages(setdiff(packages, rownames(installed.packages())))  
 }
@@ -24,12 +24,14 @@ library(rpart)       # for fitting decision trees
 library(ipred)       # for fitting bagged decision trees
 library(vip)  # for feature interpretation
 library(dbarts) # for modeling with BART
+library(vegan) # For MDS analysis
 
 # Helper packages
 library(tidyverse) # for data manipulation, graphic, and data wrangling
 library(viridis) # for colorblind friendly colors in ggplot
 library(here)   # for creating pathways relative to the top-level directory
 library(reshape2) # for data manipulation
+library(xtable) # For creating Latex tables
 
 # Loading the data
 
