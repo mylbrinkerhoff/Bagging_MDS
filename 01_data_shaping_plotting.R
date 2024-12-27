@@ -326,6 +326,45 @@ slz_soe_trans <-  slz_soe_trans %>%
   rename(soe = value)%>%
   select(-variable)
 
+### a1
+slz_a1 <-  slz %>%
+  select(idnum, A1c_means001, A1c_means002, A1c_means003,
+         A1c_means004, A1c_means005, A1c_means006,
+         A1c_means007, A1c_means008, A1c_means009,
+         A1c_means010)
+
+slz_a1_trans  <-  melt(slz_a1, id = c("idnum"))
+slz_a1_trans$measurement.no  <-  str_sub(slz_a1_trans$variable,-2,-1)
+slz_a1_trans <-  slz_a1_trans %>%
+  rename(a1 = value)%>%
+  select(-variable)
+
+### a2
+slz_a2 <-  slz %>%
+  select(idnum, A2c_means001, A2c_means002, A2c_means003,
+         A2c_means004, A2c_means005, A2c_means006,
+         A2c_means007, A2c_means008, A2c_means009,
+         A2c_means010)
+
+slz_a2_trans  <-  melt(slz_a2, id = c("idnum"))
+slz_a2_trans$measurement.no  <-  str_sub(slz_a2_trans$variable, -2, -1)
+slz_a2_trans <-  slz_a2_trans %>%
+  rename(a2 = value)%>%
+  select(-variable) 
+
+### a3
+slz_a3 <-  slz %>%
+  select(idnum, A3c_means001, A3c_means002, A3c_means003,
+         A3c_means004, A3c_means005, A3c_means006,
+         A3c_means007, A3c_means008, A3c_means009,
+         A3c_means010)
+
+slz_a3_trans  <-  melt(slz_a3, id = c("idnum"))
+slz_a3_trans$measurement.no  <-  str_sub(slz_a3_trans$variable, -2, -1)
+slz_a3_trans <-  slz_a3_trans %>%
+  rename(a3 = value)%>%
+  select(-variable) 
+
 ### merging
 slz_trans <-  list(slz_h1h2c_trans,
                    slz_h1c_trans,
@@ -347,7 +386,10 @@ slz_trans <-  list(slz_h1h2c_trans,
                    slz_sB1_trans,
                    slz_sB2_trans,
                    slz_energy_trans,
-                   slz_soe_trans) %>% reduce(merge, by = c("idnum","measurement.no"))
+                   slz_soe_trans,
+                   slz_a1_trans,
+                   slz_a2_trans,
+                   slz_a3_trans) %>% reduce(merge, by = c("idnum","measurement.no"))
 
 # Saving the file 
 write.csv(slz_trans, file = "data/interim/slz_transformed.csv", row.names = F, fileEncoding = "UTF-8")

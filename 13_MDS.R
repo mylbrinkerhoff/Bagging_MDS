@@ -87,7 +87,7 @@ weights_raw
 # Create a latex table of the MDS weights
 weights_table <- xtable(weights)
 weights_table
-print(weights_table, file = "weights_table.tex")
+print(weights_table, file = here("results/", "weights_table.tex"))
 weights_raw_tb <- xtable(weights_raw)
 weights_raw_tb
 
@@ -135,7 +135,7 @@ stress_values <- sapply(1:10, function(k) {
 })
 
 # Create a dataframe for plotting
-stress_df <- data.frame(Dimensions = 1:10, Stress = stress_values*100)
+stress_df <- data.frame(Dimensions = 1:10, Stress = stress_values)
 
 # Plot the scree plot
 stress_plot <- ggplot(stress_df, aes(x = Dimensions, y = Stress)) +
@@ -163,46 +163,46 @@ ggsave(filename = "figs/stress_plot.eps",
         plot = stress_plot,
         width = 6, height = 4, dpi = 300, units = "in")
 
-# Calculating r^2 for each parameter 
-nmds_dim1 <- mds$points[, 1] # dimension 1 
-nmds_dim2 <- mds$points[, 2] # dimension 2
-nmds_dim3 <- mds$points[, 3] # dimension 3
+# # Calculating r^2 for each parameter 
+# nmds_dim1 <- mds$points[, 1] # dimension 1 
+# nmds_dim2 <- mds$points[, 2] # dimension 2
+# nmds_dim3 <- mds$points[, 3] # dimension 3
 
-# Extracting all parameter columns
-parameters <- slz_mds[, 1:21] # selecting all 21 parameters
+# # Extracting all parameter columns
+# parameters <- slz_mds[, 1:21] # selecting all 21 parameters
 
-# Create an empty df to store correlations
-correlations <- data.frame(Parameter = colnames(parameters),
-                           Dim1 = NA,
-                           Dim2 = NA,
-                           Dim3 = NA)
+# # Create an empty df to store correlations
+# correlations <- data.frame(Parameter = colnames(parameters),
+#                            Dim1 = NA,
+#                            Dim2 = NA,
+#                            Dim3 = NA)
 
-# loop through each parameter and calculate the r^2 for each dimension
-for (i in 1:ncol(parameters)) {
-  # calculate r^2 for dim1
-  correlations$Dim1[i] <- cor(parameters[, i], nmds_dim1)
+# # loop through each parameter and calculate the r^2 for each dimension
+# for (i in 1:ncol(parameters)) {
+#   # calculate r^2 for dim1
+#   correlations$Dim1[i] <- cor(parameters[, i], nmds_dim1)
   
-  # calculate r^2 for dim2
-  correlations$Dim2[i] <- cor(parameters[, i], nmds_dim2)
+#   # calculate r^2 for dim2
+#   correlations$Dim2[i] <- cor(parameters[, i], nmds_dim2)
   
-  # calculate r^2 for dim3
-  correlations$Dim3[i] <- cor(parameters[, i], nmds_dim3)
-}
+#   # calculate r^2 for dim3
+#   correlations$Dim3[i] <- cor(parameters[, i], nmds_dim3)
+# }
 
-correlations
-correlations_tb <- xtable(correlations, digits = 3)
-correlations_tb
+# correlations
+# correlations_tb <- xtable(correlations, digits = 3)
+# correlations_tb
 
-# Fit environmental variables
-envfit_result <- envfit(mds, slz_mds, permutations = 999)
+# # Fit environmental variables
+# envfit_result <- envfit(mds, slz_mds, permutations = 999)
 
-# Print the results
-print("Environmental fit results:")
-print(envfit_result)
+# # Print the results
+# print("Environmental fit results:")
+# print(envfit_result)
 
-# Plot the NMDS result with environmental vectors
-plot(mds, type = "t")
-plot(envfit_result, p.max = 0.05)  # Only plot significant vectors
+# # Plot the NMDS result with environmental vectors
+# plot(mds, type = "t")
+# plot(envfit_result, p.max = 0.05)  # Only plot significant vectors
 
 # Calculate correlations between original variables and NMDS dimensions
 correlations_2 <- cor(slz_mds, mds_scores$sites)
@@ -232,7 +232,7 @@ stress_plot_dur <- ggplot(stress_df_dur, aes(x = Dimensions, y = Stress)) +
   geom_line() +
   theme_bw() +
   scale_x_continuous(breaks = seq(2, 10, by = 2)) + 
-  labs(title = "Scree Plot for the MDS solution", x = "Number of Dimensions", y = "Stress")
+  labs(title = "Scree Plot for the MDS solution with Duration added", x = "Number of Dimensions", y = "Stress")
 stress_plot_dur
 
 # Perform MDS analysis
@@ -246,7 +246,7 @@ weights_raw_dur
 # Create a table of the MDS weights
 weights_table_dur <- xtable(weights_dur)
 weights_table_dur
-print(weights_table_dur, file = "weights_table_dur.tex")
+print(weights_table_dur, file = here("results/", "weights_table_dur.tex"))
 weights_raw_tb_dur <- xtable(weights_raw_dur)
 weights_raw_tb_dur
 
@@ -267,7 +267,7 @@ nmds12_dur <- ggplot(nmds_scores_dur, aes(x = NMDS1, y = NMDS2, color = Phonatio
   geom_point(size = 3) +
   geom_text(vjust = 1.5) +
   theme_bw() +
-  labs(title = "NMDS Plot (Dimension 1 x Dimension 2)", x = "NMDS1", y = "NMDS2") +
+  labs(title = "NMDS Plot with Duration added (Dimension 1 x Dimension 2)", x = "NMDS1", y = "NMDS2") +
   scale_color_manual(values = colorblind, name = "Phonation")
 nmds12_dur
 
@@ -275,7 +275,7 @@ nmds13_dur <- ggplot(nmds_scores_dur, aes(x = NMDS1, y = NMDS3, color = Phonatio
   geom_point(size = 3) +
   geom_text(vjust = 1.5) +
   theme_bw() +
-  labs(title = "NMDS Plot (Dimension 1 x Dimension 3)", x = "NMDS1", y = "NMDS3") +
+  labs(title = "NMDS Plot with Duration added (Dimension 1 x Dimension 3)", x = "NMDS1", y = "NMDS3") +
   scale_color_manual(values = colorblind, name = "Phonation")
 nmds13_dur
 
@@ -283,7 +283,7 @@ nmds23_dur <- ggplot(nmds_scores, aes(x = NMDS2, y = NMDS3, color = Phonation, l
   geom_point(size = 3) +
   geom_text(vjust = 1.5) +
   theme_bw() +
-  labs(title = "NMDS Plot (Dimension 2 x Dimension 3)", x = "NMDS2", y = "NMDS3") +
+  labs(title = "NMDS Plot with Duration added (Dimension 2 x Dimension 3)", x = "NMDS2", y = "NMDS3") +
   scale_color_manual(values = colorblind, name = "Phonation")
 nmds23_dur
 

@@ -103,4 +103,3 @@ write.csv(slz_filtered,
           file = "data/interim/slz_filtered.csv", 
           row.names = F, 
           fileEncoding = "UTF-8")
-
