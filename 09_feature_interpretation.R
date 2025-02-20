@@ -27,13 +27,13 @@ Importance), y = Importance)) +
 variable_importance
 
 # Save the plot as an image in the figs folder
-ggsave(filename = "figs/vip.eps",
+ggsave(filename = "figs/vip_bagginig.eps",
     plot = variable_importance,
-    width = 6, height = 3, dpi = 300, units = "in")
+    width = 6, height = 4, dpi = 300, units = "in")
 
 ggsave(filename = "figs/vip.png",
     plot = variable_importance,
-    width = 6, height = 3, dpi = 300, units = "in")
+    width = 6, height = 4, dpi = 300, units = "in")
 
 ggsave(filename = "figs/vip_large.png",
     plot = variable_importance,

@@ -10,7 +10,7 @@
 
 ### install packages if not yet installed
 packages <- c("lme4","tidyverse","viridis", "rsample", "caret", "rpart", 
-              "ipred", "here", "reshape2", "vip", "randomForest", "xtable", "vegan", "dbarts")
+              "ipred", "here", "reshape2", "vip", "randomForest", "xtable", "vegan", "dbarts", "plotrix")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
   install.packages(setdiff(packages, rownames(installed.packages())))  
 }
@@ -32,6 +32,7 @@ library(viridis) # for colorblind friendly colors in ggplot
 library(here)   # for creating pathways relative to the top-level directory
 library(reshape2) # for data manipulation
 library(xtable) # For creating Latex tables
+library(plotrix) # For creating pie charts
 
 # Loading the data
 

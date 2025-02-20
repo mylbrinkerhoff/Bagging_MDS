@@ -15,7 +15,9 @@ colnames(slz)[colnames(slz) == 'seg_End'] <- 'Duration'
 
 ### Rearranging values for analysis and comparison
 slz <- slz %>% 
-  mutate(idnum = row_number())
+  mutate(idnum = row_number()) %>%
+  mutate(Phonation = recode(Phonation, "laryngealized" = "rearticulated"))
+  
 
 #### h1h2c
 
@@ -64,6 +66,32 @@ slz_h1c_trans  <-  melt(slz_h1c, id = c("idnum"))
 slz_h1c_trans$measurement.no  <-  str_sub(slz_h1c_trans$variable,-2,-1)
 slz_h1c_trans <-  slz_h1c_trans %>%
   rename(h1c = value)%>%
+  select(-variable)
+
+#### h2c
+slz_h2c <-  slz %>%
+  select(idnum, H2c_means001, H2c_means002, H2c_means003,
+         H2c_means004, H2c_means005, H2c_means006,
+         H2c_means007, H2c_means008, H2c_means009,
+         H2c_means010)
+
+slz_h2c_trans  <-  melt(slz_h2c, id = c("idnum"))
+slz_h2c_trans$measurement.no  <-  str_sub(slz_h2c_trans$variable,-2,-1)
+slz_h2c_trans <-  slz_h2c_trans %>%
+  rename(h2c = value)%>%
+  select(-variable)
+
+#### h4c
+slz_h4c <-  slz %>%
+  select(idnum, H4c_means001, H4c_means002, H4c_means003,
+         H4c_means004, H4c_means005, H4c_means006,
+         H4c_means007, H4c_means008, H4c_means009,
+         H4c_means010)
+
+slz_h4c_trans  <-  melt(slz_h4c, id = c("idnum"))
+slz_h4c_trans$measurement.no  <-  str_sub(slz_h4c_trans$variable,-2,-1)
+slz_h4c_trans <-  slz_h4c_trans %>%
+  rename(h4c = value)%>%
   select(-variable)
 
 #####  h2h4c
@@ -245,7 +273,7 @@ slz_strF0 <-  slz %>%
 slz_strF0_trans  <-  melt(slz_strF0, id = c("idnum"))
 slz_strF0_trans$measurement.no  <-  str_sub(slz_strF0_trans$variable,-2,-1)
 slz_strF0_trans <-  slz_strF0_trans %>%
-  rename(strF0 = value)%>%
+  rename(f0 = value)%>%
   select(-variable)
 
 #### sF1
@@ -258,7 +286,7 @@ slz_sF1 <-  slz %>%
 slz_sF1_trans  <-  melt(slz_sF1, id = c("idnum"))
 slz_sF1_trans$measurement.no  <-  str_sub(slz_sF1_trans$variable,-2,-1)
 slz_sF1_trans <-  slz_sF1_trans %>%
-  rename(sF1 = value)%>%
+  rename(f1 = value)%>%
   select(-variable)
 
 #### sF2
@@ -271,7 +299,7 @@ slz_sF2 <-  slz %>%
 slz_sF2_trans  <-  melt(slz_sF2, id = c("idnum"))
 slz_sF2_trans$measurement.no  <-  str_sub(slz_sF2_trans$variable,-2,-1)
 slz_sF2_trans <-  slz_sF2_trans %>%
-  rename(sF2 = value)%>%
+  rename(f2 = value)%>%
   select(-variable)
 
 #### sB1
@@ -336,7 +364,7 @@ slz_a1 <-  slz %>%
 slz_a1_trans  <-  melt(slz_a1, id = c("idnum"))
 slz_a1_trans$measurement.no  <-  str_sub(slz_a1_trans$variable,-2,-1)
 slz_a1_trans <-  slz_a1_trans %>%
-  rename(a1 = value)%>%
+  rename(a1c = value)%>%
   select(-variable)
 
 ### a2
@@ -349,7 +377,7 @@ slz_a2 <-  slz %>%
 slz_a2_trans  <-  melt(slz_a2, id = c("idnum"))
 slz_a2_trans$measurement.no  <-  str_sub(slz_a2_trans$variable, -2, -1)
 slz_a2_trans <-  slz_a2_trans %>%
-  rename(a2 = value)%>%
+  rename(a2c = value)%>%
   select(-variable) 
 
 ### a3
@@ -362,12 +390,14 @@ slz_a3 <-  slz %>%
 slz_a3_trans  <-  melt(slz_a3, id = c("idnum"))
 slz_a3_trans$measurement.no  <-  str_sub(slz_a3_trans$variable, -2, -1)
 slz_a3_trans <-  slz_a3_trans %>%
-  rename(a3 = value)%>%
+  rename(a3c = value)%>%
   select(-variable) 
 
 ### merging
 slz_trans <-  list(slz_h1h2c_trans,
                    slz_h1c_trans,
+                   slz_h2c_trans,
+                   slz_h4c_trans,
                    slz_h2h4c_trans,
                    slz_h42Kc_trans,
                    slz_h2Kh5Kc_trans,

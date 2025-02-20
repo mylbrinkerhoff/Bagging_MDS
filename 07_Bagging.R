@@ -39,3 +39,5 @@ slz_bag2 <- train(formula_zscore,
 
 slz_bag2
 
+prediction <- predict(slz_bag2, slz_test)
+confusionMatrix(prediction, slz_test$Phonation)

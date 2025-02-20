@@ -36,3 +36,6 @@ slz_test   <- testing(split_strat)
 table(slz_train$Phonation) %>% prop.table()
 table(slz_test$Phonation) %>% prop.table()
 
+# save the training and test sets
+write.csv(slz_train, "data/processed/slz_train.csv", row.names = FALSE)
+write.csv(slz_test, "data/processed/slz_test.csv", row.names = FALSE)
