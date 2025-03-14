@@ -10,7 +10,8 @@
 
 ### install packages if not yet installed
 packages <- c("lme4","tidyverse","viridis", "rsample", "caret", "rpart", 
-              "ipred", "here", "reshape2", "vip", "randomForest", "xtable", "vegan", "dbarts", "plotrix")
+              "ipred", "here", "reshape2", "vip", "randomForest", "xtable", 
+              "vegan", "dbarts", "plotrix")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
   install.packages(setdiff(packages, rownames(installed.packages())))  
 }
