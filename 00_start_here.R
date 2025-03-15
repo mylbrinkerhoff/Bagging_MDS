@@ -36,9 +36,7 @@ library(xtable) # For creating Latex tables
 library(plotrix) # For creating pie charts
 
 # Loading the data
-
 slz <- read.csv(here("data/raw/", "Voice_Master_Split.csv"))
 
 # Create a variable for colorblind palette
-
 colorblind <- palette.colors(palette = "Okabe-Ito")

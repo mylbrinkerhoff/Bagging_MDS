@@ -76,8 +76,26 @@ if (min_value < 0) {
 # set seed for reproducibility
 set.seed(123)
 
+# Calculate stress values for different dimensions
+stress_values <- sapply(1:10, function(k) {
+  mds <- metaMDS(slz_mds, distance = "manhattan", k = k, trymax = 100)
+  return(mds$stress)
+})
+
+# Create a dataframe for plotting
+stress_df <- data.frame(Dimensions = 1:10, Stress = stress_values)
+
+# Plot the scree plot
+stress_plot <- ggplot(stress_df, aes(x = Dimensions, y = Stress)) +
+  geom_point(size = 3) +
+  geom_line() +
+  theme_bw() +
+  scale_x_continuous(breaks = seq(2, 10, by = 2)) + 
+  labs(title = "Scree Plot for the MDS solution", x = "Number of Dimensions", y = "Stress")
+stress_plot
+
 # Perform MDS analysis
-mds <- metaMDS(slz_mds, distance = "manhattan", wascores = TRUE, old.wa = TRUE, k = 3)
+mds <- metaMDS(slz_mds, distance = "manhattan", wascores = TRUE, old.wa = TRUE, k = 4)
 
 weights=abs(mds$species)
 weights
@@ -109,7 +127,8 @@ nmds12 <- ggplot(nmds_scores, aes(x = NMDS1, y = NMDS2, color = Phonation, label
   geom_text(vjust = 1.5) +
   theme_bw() +
   labs(title = "NMDS Plot (Dimension 1 x Dimension 2)", x = "NMDS1", y = "NMDS2") +
-  scale_color_manual(values = colorblind, name = "Phonation")
+  scale_color_manual(values = colorblind, name = "Phonation") + 
+  theme(legend.position = "bottom")
 nmds12
 
 nmds13 <- ggplot(nmds_scores, aes(x = NMDS1, y = NMDS3, color = Phonation, label = Speaker_Phonation)) +
@@ -117,7 +136,8 @@ nmds13 <- ggplot(nmds_scores, aes(x = NMDS1, y = NMDS3, color = Phonation, label
   geom_text(vjust = 1.5) +
   theme_bw() +
   labs(title = "NMDS Plot (Dimension 1 x Dimension 3)", x = "NMDS1", y = "NMDS3") +
-  scale_color_manual(values = colorblind, name = "Phonation")
+  scale_color_manual(values = colorblind, name = "Phonation") + 
+  theme(legend.position = "bottom")
 nmds13
 
 nmds23 <- ggplot(nmds_scores, aes(x = NMDS2, y = NMDS3, color = Phonation, label = Speaker_Phonation)) +
@@ -125,41 +145,65 @@ nmds23 <- ggplot(nmds_scores, aes(x = NMDS2, y = NMDS3, color = Phonation, label
   geom_text(vjust = 1.5) +
   theme_bw() +
   labs(title = "NMDS Plot (Dimension 2 x Dimension 3)", x = "NMDS2", y = "NMDS3") +
-  scale_color_manual(values = colorblind, name = "Phonation")
+  scale_color_manual(values = colorblind, name = "Phonation") + 
+  theme(legend.position = "bottom")
 nmds23
 
-# Calculate stress values for different dimensions
-stress_values <- sapply(1:10, function(k) {
-  mds <- metaMDS(slz_mds, distance = "manhattan", k = k, trymax = 100)
-  return(mds$stress)
-})
-
-# Create a dataframe for plotting
-stress_df <- data.frame(Dimensions = 1:10, Stress = stress_values)
-
-# Plot the scree plot
-stress_plot <- ggplot(stress_df, aes(x = Dimensions, y = Stress)) +
+nmds14 <- ggplot(nmds_scores, aes(x = NMDS1, y = NMDS4, color = Phonation, label = Speaker_Phonation)) +
   geom_point(size = 3) +
-  geom_line() +
+  geom_text(vjust = 1.5) +
   theme_bw() +
-  scale_x_continuous(breaks = seq(2, 10, by = 2)) + 
-  labs(title = "Scree Plot for the MDS solution", x = "Number of Dimensions", y = "Stress")
-stress_plot
+  labs(title = "NMDS Plot (Dimension 1 x Dimension 4)", x = "NMDS1", y = "NMDS4") +
+  scale_color_manual(values = colorblind, name = "Phonation") + 
+  theme(legend.position = "bottom")
+nmds14
+
+nmds24 <- ggplot(nmds_scores, aes(x = NMDS2, y = NMDS4, color = Phonation, label = Speaker_Phonation)) +
+  geom_point(size = 3) +
+  geom_text(vjust = 1.5) +
+  theme_bw() +
+  labs(title = "NMDS Plot (Dimension 2 x Dimension 4)", x = "NMDS2", y = "NMDS4") +
+  scale_color_manual(values = colorblind, name = "Phonation") + 
+  theme(legend.position = "bottom")
+nmds24
+
+nmds34 <- ggplot(nmds_scores, aes(x = NMDS3, y = NMDS4, color = Phonation, label = Speaker_Phonation)) +
+  geom_point(size = 3) +
+  geom_text(vjust = 1.5) +
+  theme_bw() +
+  labs(title = "NMDS Plot (Dimension 3 x Dimension 4)", x = "NMDS3", y = "NMDS4") +
+  scale_color_manual(values = colorblind, name = "Phonation") + 
+  theme(legend.position = "bottom")
+nmds34
 
 
-ggsave(filename = "figs/nmds12.eps",
+# Saving the plots
+ggsave(filename = "figs/nmds12_4:7.eps",
        plot = nmds12,
        width = 6, height = 4, dpi = 300, units = "in")
 
-ggsave(filename = "figs/nmds13.eps",
+ggsave(filename = "figs/nmds13_4:7.eps",
         plot = nmds13,
         width = 6, height = 4, dpi = 300, units = "in")
 
-ggsave(filename = "figs/nmds23.eps",
+ggsave(filename = "figs/nmds23_4:7.eps",
         plot = nmds23,
         width = 6, height = 4, dpi = 300, units = "in")
 
-ggsave(filename = "figs/stress_plot.eps",
+ggsave(filename = "figs/nmds14_4:7.eps",
+        plot = nmds14,
+        width = 6, height = 4, dpi = 300, units = "in")
+
+ggsave(filename = "figs/nmds24_4:7.eps",
+        plot = nmds24,
+        width = 6, height = 4, dpi = 300, units = "in")
+
+ggsave(filename = "figs/nmds34_4:7.eps",
+        plot = nmds34,
+        width = 6, height = 4, dpi = 300, units = "in")
+
+# Saving the stress plot
+ggsave(filename = "figs/stress_plot_4:7.eps",
         plot = stress_plot,
         width = 6, height = 4, dpi = 300, units = "in")
 
@@ -211,6 +255,11 @@ correlations_2 <- cor(slz_mds, mds_scores$sites)
 print("Correlations between original variables and NMDS dimensions:")
 print(correlations_2)
 
+corr_table <- xtable(correlations_2, digits = 3)
+corr_table  
+# Create a table of the MDS weights
+print(corr_table, file = here("results/", "corr_table.tex"))
+
 ### MDS with duration added
 
 # set seed
@@ -236,7 +285,7 @@ stress_plot_dur <- ggplot(stress_df_dur, aes(x = Dimensions, y = Stress)) +
 stress_plot_dur
 
 # Perform MDS analysis
-mds_dur <- metaMDS(slz_mds_duration, distance = "manhattan", wascores = TRUE, old.wa = TRUE, k = 3)
+mds_dur <- metaMDS(slz_mds_duration, distance = "manhattan", wascores = TRUE, old.wa = TRUE, k = 4)
 
 weights_dur=abs(mds_dur$species)
 weights_dur

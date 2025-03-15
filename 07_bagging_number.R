@@ -11,7 +11,7 @@
 
 # Determining the number of trees
 # assess 10-1000 bagged trees
-ntree <- seq(20, 1000, by = 20)
+ntree <- seq(50, 5000, by = 50)
 
 # create empty vector to store OOB RMSE values
 rmse <- vector(mode = "numeric", length = length(ntree))
@@ -36,6 +36,10 @@ for (i in seq_along(ntree)) {
 # Store the results in a dataframe
 bagging_errors <- data.frame(ntree, rmse)
 
+# Arrange the dataframe by rmse
+bagging_errors %>%
+  arrange(rmse)
+
 # Visualize the OOB RMSE values using ggplot2
 bagging_numbers <- ggplot(bagging_errors, aes(x = ntree, y = rmse)) +
                           geom_line() +
@@ -43,6 +47,7 @@ bagging_numbers <- ggplot(bagging_errors, aes(x = ntree, y = rmse)) +
                           x = "Number of Trees",
                           y = "OOB RMSE") +
                           theme_bw()
+bagging_numbers
 
 # ggplot(bagging_errors, aes(ntree, rmse)) +
 #   geom_line() +
@@ -53,6 +58,6 @@ bagging_numbers <- ggplot(bagging_errors, aes(x = ntree, y = rmse)) +
 #   xlab("Number of trees")
   
 
-ggsave(filename = "figs/bagging_numbers.eps", 
+ggsave(filename = "figs/bagging_numbers_4:7.eps", 
         plot = bagging_numbers, 
         width = 6, height = 4, units = "in", dpi = 300)

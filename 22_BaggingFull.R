@@ -16,6 +16,9 @@ slz_plot$Phonation <- factor(slz_plot$Phonation, levels = c("modal",
                                                               "checked", 
                                                               "rearticulated"))
 
+# Create a variable for colorblind palette
+colorblind <- palette.colors(palette = "Okabe-Ito")
+
 # stratified sampling so the training and test sets have similar distributions
 table(slz_plot$Phonation) %>% prop.table() # initial distributions of VQ
 
@@ -78,6 +81,11 @@ bagging_numbers <- ggplot(bagging_errors, aes(x = ntree, y = rmse)) +
                           x = "Number of Trees",
                           y = "OOB RMSE") +
                           theme_bw()
+bagging_numbers
+
+
+bagging_errors |> 
+  arrange(rmse)
 
 # train bagged model
 slz_bag1 <- bagging(
@@ -95,7 +103,7 @@ slz_bag2 <- train(formula_zscore,
   data = slz_train,
   method = "treebag",
   trControl = trainControl(method = "cv", number = 10),
-  nbagg = 400,  
+  nbagg = 340,  
   control = rpart.control(minsplit = 2, cp = 0)
 )
 

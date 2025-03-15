@@ -21,14 +21,10 @@ library(here) # For file path management
 # Load the data
 slz_plot <- read.csv("data/interim/slz_plot_standardized.csv", header = TRUE)
 ### convert certain columns into factors.
-slz_plot$Phonation <- factor(slz_plot$Phonation, levels = c("modal", 
-                                                              "breathy", 
-                                                              "checked", 
-                                                              "rearticulated"))
-slz_plot$Speaker <- slz_plot$Speaker %>% factor()
-slz_plot$Word <- slz_plot$Word %>% factor()
-slz_plot$Vowel <- slz_plot$Vowel %>% factor()
-slz_plot$Tone <- slz_plot$Tone %>% factor()
+# slz_plot$Phonation <- factor(slz_plot$Phonation, levels = c("modal", 
+#                                                               "breathy", 
+#                                                               "checked", 
+#                                                               "rearticulated"))
 
 # Create a variable for colorblind palette
 colorblind <- palette.colors(palette = "Okabe-Ito")
