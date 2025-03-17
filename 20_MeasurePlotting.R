@@ -463,7 +463,7 @@ h1c.line <- ggplot(df_plot,
   theme_bw()
 h1c.line
 
-h1c.line.sp <- ggplot(df_plot,
+h1c.line.sp <- ggplot(df_plot_speaker,
                     aes(x = measurement.no, y = h1c.mean)) + 
   geom_point(aes(shape = Phonation), size = 7) +
   scale_shape_manual(values = c(0, 1, 2, 5)) +
@@ -750,6 +750,56 @@ norm.soe.line <- ggplot(df_plot,
   theme_bw()
 norm.soe.line
 
+norm.soe.line.sp <- ggplot(df_plot_speaker,
+                    aes(x = measurement.no, y = norm.soe.mean)) + 
+  geom_point(aes(shape = Phonation), size = 3) +
+  scale_shape_manual(values = c(0, 1, 2, 5)) +
+  # geom_smooth(aes(group = Phonation, colour = Phonation), stat = "identity") +
+  geom_errorbar(aes(ymin = norm.soe.mse, ymax = norm.soe.pse, colour = Phonation), width = 0.2)+
+  geom_line(aes(colour = Phonation), linewidth = 1) +
+  scale_colour_manual(values = colorblind) +
+  facet_wrap(.~Speaker, nrow = 2, ncol = 5) +
+  scale_x_continuous(n.breaks = 10) +
+  labs(title = "Strength of Excitation by speaker",
+       x = "Measurement Number",
+       y = "Strength of Excitation (normalized)") +
+  theme_bw()+
+  theme(legend.position = "bottom") # moved it to the bottom for better visibility
+norm.soe.line.sp
+
+norm.soe.line.tone <- ggplot(df_plot_tone,
+                    aes(x = measurement.no, y = norm.soe.mean)) +
+  geom_point(aes(shape = Phonation), size = 3) +
+  scale_shape_manual(values = c(0, 1, 2, 5)) +
+  # geom_smooth(aes(group = Phonation, colour = Phonation), stat = "identity") +
+  geom_errorbar(aes(ymin = norm.soe.mse, ymax = norm.soe.pse, colour = Phonation), width = 0.2)+
+  geom_line(aes(colour = Phonation), linewidth = 1) +
+  scale_colour_manual(values = colorblind) +
+  facet_wrap(.~Tone, nrow = 2, ncol = 5) +
+  scale_x_continuous(n.breaks = 10) +
+  labs(title = "Strength of Excitation by tone",
+       x = "Measurement Number",
+       y = "Strength of Excitation (normalized)") +
+  theme_bw()
+norm.soe.line.tone
+
+df_low <- df_plot_tone %>%
+  filter(Tone == "L")
+
+soe_low <- ggplot(df_low,
+                    aes(x = measurement.no, y = norm.soe.mean)) + 
+  geom_point(aes(shape = Phonation), size = 3) +
+  scale_shape_manual(values = c(0, 1, 2, 5)) +
+  # geom_smooth(aes(group = Phonation, colour = Phonation), stat = "identity") +
+  geom_errorbar(aes(ymin = norm.soe.mse, ymax = norm.soe.pse, colour = Phonation), width = 0.2)+
+  geom_line(aes(colour = Phonation), linewidth = 1) +
+  scale_colour_manual(values = colorblind) +
+  scale_x_continuous(n.breaks = 10) +
+  labs(title = "Strength of Excitation for low tone",
+       x = "Measurement Number",
+       y = "Strength of Excitation (normalized)") +
+  theme_bw()
+
 H1c.resid.line <- ggplot(df_plot,
                     aes(x = measurement.no, y = H1c.resid.mean)) + 
   geom_point(aes(shape = Phonation), size = 3) +
@@ -844,6 +894,21 @@ a1c.resid.line.vowel <- ggplot(df_plot_vowels,
        y = "A1* (normalized)") +
   theme_bw()
 a1c.resid.line.vowel
+
+a2c.line <- ggplot(df_plot,
+                    aes(x = measurement.no, y = a2c.mean)) + 
+  geom_point(aes(shape = Phonation), size = 3) +
+  scale_shape_manual(values = c(0, 1, 2, 5)) +
+  # geom_smooth(aes(group = Phonation, colour = Phonation), stat = "identity") +
+  geom_errorbar(aes(ymin = a2c.mse, ymax = a2c.pse, colour = Phonation), width = 0.2)+
+  geom_line(aes(colour = Phonation), linewidth = 1) +
+  scale_colour_manual(values = colorblind) +
+  scale_x_continuous(n.breaks = 10) +
+  labs(title = "A2*",
+       x = "Measurement Number",
+       y = "A2* (normalized)") +
+  theme_bw()
+a2c.line
 
 # Saving the plots
 ggsave(filename = "figs/slz_h1h2.eps",

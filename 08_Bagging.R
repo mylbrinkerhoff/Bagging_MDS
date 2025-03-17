@@ -33,7 +33,7 @@ slz_bag2 <- train(formula_zscore,
   data = slz_train,
   method = "treebag",
   trControl = trainControl(method = "cv", number = 10),
-  nbagg = 400,  
+  nbagg = 1400,  
   control = rpart.control(minsplit = 2, cp = 0)
 )
 

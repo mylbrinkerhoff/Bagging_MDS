@@ -11,7 +11,7 @@
 
 # Determining the number of trees
 # assess 10-1000 bagged trees
-ntree <- seq(50, 5000, by = 50)
+ntree <- seq(50, 3000, by = 50)
 
 # create empty vector to store OOB RMSE values
 rmse <- vector(mode = "numeric", length = length(ntree))
