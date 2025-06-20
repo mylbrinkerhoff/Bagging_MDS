@@ -13,11 +13,11 @@ colnames(slz)[colnames(slz) == 'seg_End'] <- 'Duration'
 
 ### Rearranging values for analysis and comparison
 slz <- slz %>% 
-  mutate(idnum = row_number())
+  dplyr::mutate(idnum = row_number())
 
 # Preprocessing the data for bagging
 slz_bagging <- slz %>%
-  mutate(h1c = (H1c_means004 + H1c_means005 + H1c_means006 + H1c_means007)/4,
+  dplyr::mutate(h1c = (H1c_means004 + H1c_means005 + H1c_means006 + H1c_means007)/4,
          h2c = (H2c_means004 + H2c_means005 + H2c_means006 + H2c_means007)/4,
          h4c = (H4c_means004 + H4c_means005 + H4c_means006 + H4c_means007)/4,
          a1c = (A1c_means004 + A1c_means005 + A1c_means006 + A1c_means007)/4,

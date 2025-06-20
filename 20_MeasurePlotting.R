@@ -415,7 +415,40 @@ df_plot_tone <- slz_plot%>%
           ) %>%
   ungroup()
 
-# Plotting point and line graphs
+df_low <- df_plot_tone %>%
+  filter(Tone == "L")
+
+# Plotting duration
+my_comparisons <- list(c("modal", "breathy"), 
+                       c("modal", "checked"), 
+                       c("modal", "rearticulated"))
+                       # c("breathy", "checked"),
+                       # c("breathy", "rearticulated"),
+                       # c("checked", "rearticulated"))
+
+p <-slz_plot %>%
+  ggpubr::ggviolin(x = "Phonation", y = "durationz", fill = "Phonation",
+           palette = colorblind,
+           add = "boxplot", add.params = list(fill = "white"), alpha = 0.5) 
+
+duration_plot <- p + 
+  # stat_compare_means(comparisons = my_comparisons, label = "p.signif")+ # Add significance levels
+  # stat_compare_means(label.y = 8) +
+  labs(title = "Violin plots for Duration",
+       x = "Phonation",
+       y = "Duration (normalized)") +
+  theme_bw() + 
+  theme(legend.position = "top")
+duration_plot
+
+ggsave(duration_plot, filename = here("figs", "duration_plot.eps"), 
+       width = 6,
+       height = 4,
+       dpi = 300,
+       device = cairo_ps,
+       units = "in")
+
+# Plotting point and line graph
 
 h1h2.line <- ggplot(df_plot,
             aes(x = measurement.no, y = h1h2.mean)) + 
@@ -537,8 +570,16 @@ h1a1.line <- ggplot(df_plot,
   labs(title = "H1*-A1*",
        x = "Measurement Number",
        y = "H1*-A1* (normalized)") +
-  theme_bw()
+  theme_bw() +
+  theme(legend.position = "bottom")
 h1a1.line
+
+ggsave(h1a1.line, filename = here("figs", "h1a1_line.eps"), 
+       width = 6,
+       height = 4,
+       dpi = 300,
+       device = cairo_ps,
+       units = "in")
 
 h1a2.line <- ggplot(df_plot,
                     aes(x = measurement.no, y = h1a2.mean)) + 
@@ -584,6 +625,53 @@ cpp.line <- ggplot(df_plot,
        y = "CPP (normalized)") +
   theme_bw()
 cpp.line
+
+cpp_speaker <- ggplot(df_plot_speaker,
+                    aes(x = measurement.no, y = cpp.mean)) + 
+  geom_point(aes(shape = Phonation), size = 7) +
+  scale_shape_manual(values = c(0, 1, 2, 5)) +
+  # geom_smooth(aes(group = Phonation, colour = Phonation), stat = "identity") +
+  geom_errorbar(aes(ymin = cpp.mse, ymax = cpp.pse, colour = Phonation), width = 0.2)+
+  geom_line(aes(colour = Phonation), linewidth = 1.5) +
+  scale_colour_manual(values = colorblind) +
+  scale_x_continuous(n.breaks = 10) +
+  facet_wrap(.~Speaker, nrow = 2, ncol = 5) +
+  labs(title = "CPP by speaker",
+       x = "Measurement Number",
+       y = "CPP (normalized)") +
+  theme_bw()
+cpp_speaker
+
+cpp_tone <- ggplot(df_plot_tone,
+                    aes(x = measurement.no, y = cpp.mean)) + 
+  geom_point(aes(shape = Phonation), size = 7) +
+  scale_shape_manual(values = c(0, 1, 2, 5)) +
+  # geom_smooth(aes(group = Phonation, colour = Phonation), stat = "identity") +
+  geom_errorbar(aes(ymin = cpp.mse, ymax = cpp.pse, colour = Phonation), width = 0.2)+
+  geom_line(aes(colour = Phonation), linewidth = 1.5) +
+  scale_colour_manual(values = colorblind) +
+  scale_x_continuous(n.breaks = 10) +
+  facet_wrap(.~Tone, nrow = 2, ncol = 5) +
+  labs(title = "CPP by tone",
+       x = "Measurement Number",
+       y = "CPP (normalized)") +
+  theme_bw()
+cpp_tone
+
+cpp_low <- df_low %>%
+  ggplot(aes(x = measurement.no, y = cpp.mean)) +
+  geom_point(aes(shape = Phonation), size = 3) +
+  scale_shape_manual(values = c(0, 1, 2, 5)) +
+  # geom_smooth(aes(group = Phonation, colour = Phonation), stat = "identity") +
+  geom_errorbar(aes(ymin = cpp.mse, ymax = cpp.pse, colour = Phonation), width = 0.2)+
+  geom_line(aes(colour = Phonation), linewidth = 1) +
+  scale_colour_manual(values = colorblind) +
+  scale_x_continuous(n.breaks = 10) +
+  labs(title = "CPP at low tone",
+       x = "Measurement Number",
+       y = "CPP (normalized)") +
+  theme_bw()
+cpp_low
 
 hnr05.line <- ggplot(df_plot,
                     aes(x = measurement.no, y = hnr05.mean)) + 
@@ -659,6 +747,21 @@ strF0.line <- ggplot(df_plot,
        y = "f0 (Hz)") +
   theme_bw()
 strF0.line
+
+f0_low <- df_low %>%
+  ggplot(aes(x = measurement.no, y = strF0.mean)) +
+  geom_point(aes(shape = Phonation), size = 3) +
+  scale_shape_manual(values = c(0, 1, 2, 5)) +
+  # geom_smooth(aes(group = Phonation, colour = Phonation), stat = "identity") +
+  geom_errorbar(aes(ymin = strF0.mse, ymax = strF0.pse, colour = Phonation), width = 0.2)+
+  geom_line(aes(colour = Phonation), linewidth = 1) +
+  scale_colour_manual(values = colorblind) +
+  scale_x_continuous(n.breaks = 10) +
+  labs(title = "f0 at low tone",
+       x = "Measurement Number",
+       y = "f0 (Hz)") +
+  theme_bw()
+f0_low
 
 sF1.line <- ggplot(df_plot,
                     aes(x = measurement.no, y = sF1.mean)) + 
@@ -783,9 +886,6 @@ norm.soe.line.tone <- ggplot(df_plot_tone,
   theme_bw()
 norm.soe.line.tone
 
-df_low <- df_plot_tone %>%
-  filter(Tone == "L")
-
 soe_low <- ggplot(df_low,
                     aes(x = measurement.no, y = norm.soe.mean)) + 
   geom_point(aes(shape = Phonation), size = 3) +
@@ -799,6 +899,7 @@ soe_low <- ggplot(df_low,
        x = "Measurement Number",
        y = "Strength of Excitation (normalized)") +
   theme_bw()
+soe_low
 
 H1c.resid.line <- ggplot(df_plot,
                     aes(x = measurement.no, y = H1c.resid.mean)) + 
@@ -830,6 +931,21 @@ H1c.resid.line.sp <- ggplot(df_plot_speaker,
        y = "Residual H1* (normalized)") +
   theme_bw()
 H1c.resid.line.sp
+
+h1c_low <- df_low %>%
+  ggplot(aes(x = measurement.no, y = H1c.resid.mean)) + 
+  geom_point(aes(shape = Phonation), size = 3) +
+  scale_shape_manual(values = c(0, 1, 2, 5)) +
+  # geom_smooth(aes(group = Phonation, colour = Phonation), stat = "identity") +
+  geom_errorbar(aes(ymin = H1c.resid.mse, ymax = H1c.resid.pse, colour = Phonation), width = 0.2)+
+  geom_line(aes(colour = Phonation), linewidth = 1) +
+  scale_colour_manual(values = colorblind) +
+  scale_x_continuous(n.breaks = 10) +
+  labs(title = "Residual H1* for low tone",
+       x = "Measurement Number",
+       y = "Residual H1* (normalized)") +
+  theme_bw()
+h1c_low
 
 
 a1c.line <- ggplot(df_plot,
@@ -895,6 +1011,22 @@ a1c.resid.line.vowel <- ggplot(df_plot_vowels,
   theme_bw()
 a1c.resid.line.vowel
 
+alc_low <- df_low %>%
+  ggplot(aes(x = measurement.no, y = a1c.mean)) + 
+  geom_point(aes(shape = Phonation), size = 3) +
+  scale_shape_manual(values = c(0, 1, 2, 5)) +
+  # geom_smooth(aes(group = Phonation, colour = Phonation), stat = "identity") +
+  geom_errorbar(aes(ymin = a1c.mse, ymax = a1c.pse, colour = Phonation), width = 0.2)+
+  geom_line(aes(colour = Phonation), linewidth = 1) +
+  scale_colour_manual(values = colorblind) +
+  scale_x_continuous(n.breaks = 10) +
+  labs(title = "A1* for low tone",
+       x = "Measurement Number",
+       y = "A1* (normalized)") +
+  theme_bw()
+alc_low
+
+
 a2c.line <- ggplot(df_plot,
                     aes(x = measurement.no, y = a2c.mean)) + 
   geom_point(aes(shape = Phonation), size = 3) +
@@ -909,6 +1041,54 @@ a2c.line <- ggplot(df_plot,
        y = "A2* (normalized)") +
   theme_bw()
 a2c.line
+
+a2c.line.sp <- ggplot(df_plot_speaker,
+                    aes(x = measurement.no, y = a2c.mean)) + 
+  geom_point(aes(shape = Phonation), size = 3) +
+  scale_shape_manual(values = c(0, 1, 2, 5)) +
+  # geom_smooth(aes(group = Phonation, colour = Phonation), stat = "identity") +
+  geom_errorbar(aes(ymin = a2c.mse, ymax = a2c.pse, colour = Phonation), width = 0.2)+
+  geom_line(aes(colour = Phonation), linewidth = 1) +
+  scale_colour_manual(values = colorblind) +
+  facet_wrap(.~Speaker, nrow = 2, ncol = 5) +
+  scale_x_continuous(n.breaks = 10) +
+  labs(title = "A2* by speaker",
+       x = "Measurement Number",
+       y = "A2* (normalized)") +
+  theme_bw()
+a2c.line.sp
+
+a2c.line.tone <- ggplot(df_plot_tone,
+                    aes(x = measurement.no, y = a2c.mean)) + 
+  geom_point(aes(shape = Phonation), size = 3) +
+  scale_shape_manual(values = c(0, 1, 2, 5)) +
+  # geom_smooth(aes(group = Phonation, colour = Phonation), stat = "identity") +
+  geom_errorbar(aes(ymin = a2c.mse, ymax = a2c.pse, colour = Phonation), width = 0.2)+
+  geom_line(aes(colour = Phonation), linewidth = 1) +
+  scale_colour_manual(values = colorblind) +
+  facet_wrap(.~Tone, nrow = 2, ncol = 5) +
+  scale_x_continuous(n.breaks = 10) +
+  labs(title = "Normalized A2* by tone",
+       x = "Measurement Number",
+       y = "A2* (normalized)") +
+  theme_bw()
+a2c.line.tone
+
+a2c_low <- df_low %>%
+  ggplot(aes(x = measurement.no, y = a2c.mean)) + 
+  geom_point(aes(shape = Phonation), size = 3) +
+  scale_shape_manual(values = c(0, 1, 2, 5)) +
+  # geom_smooth(aes(group = Phonation, colour = Phonation), stat = "identity") +
+  geom_errorbar(aes(ymin = a2c.mse, ymax = a2c.pse, colour = Phonation), width = 0.2)+
+  geom_line(aes(colour = Phonation), linewidth = 1) +
+  scale_colour_manual(values = colorblind) +
+  scale_x_continuous(n.breaks = 10) +
+  labs(title = "A2* for low tone",
+       x = "Measurement Number",
+       y = "A2* (normalized)") +
+  theme_bw()
+a2c_low
+
 
 # Saving the plots
 ggsave(filename = "figs/slz_h1h2.eps",
@@ -959,3 +1139,10 @@ ggsave(filename = "figs/slz_hnr15.png",
          height = 4,
          dpi = 300,
          units = "in")
+
+ggsave(filename = here("figs", "slz_soe.eps"),
+       plot = norm.soe.line,
+       width = 6,
+       height = 4,
+       dpi = 300,
+       units = "in")

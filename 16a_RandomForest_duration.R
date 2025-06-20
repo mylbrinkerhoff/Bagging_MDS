@@ -16,45 +16,21 @@
 install.packages("ranger") # for performing Random Forest CART analysis
 install.packages("here") # for creating pathways relative to the top-level directory
 install.packages("tidyverse") # for data manipulation, graphic, and data wrangling
-install.packages("Cairo") # for saving the plots as .eps files
-install.packages("remotes") # <- if not already installed
+install.packages("rsample") # for splitting the data into training and test sets
+install.packages("vip") # for variable importance plots
 
 # Load necessary libraries
 library(ranger) # for performing Random Forest CART analysis
 library(here) # for creating pathways relative to the top-level directory
 library(tidyverse) # for data manipulation, graphic, and data wrangling
-library(Cairo)
-library(remotes)
+library(rsample) # for splitting the data into training and test sets
+library(vip) # for variable importance plots
 
 # Loading the data
 slz_clean <- read.csv("data/processed/slz_normalized.csv", header = TRUE)
 
-slz_rf <- slz_clean %>%
-    select(Phonation, 
-           H1c_resid, 
-           h2cz, 
-           h4cz, 
-           a1cz, 
-           a2cz, 
-           a3cz, 
-           h1h2cz, 
-           h2h4cz, 
-           h1a1cz, 
-           h1a2cz, 
-           h1a3cz, 
-           h42Kcz, 
-           h2Kh5Kcz, 
-           cppz, 
-           energyz, 
-           hnr05z, 
-           hnr15z, 
-           hnr25z, 
-           hnr35z, 
-           shrz, 
-           norm.soe)
-
 slz_rf_dur <- slz_clean %>%
-  select(Phonation, 
+  dplyr::select(Phonation, 
          H1c_resid, 
          h2cz, 
          h4cz, 
@@ -79,11 +55,6 @@ slz_rf_dur <- slz_clean %>%
          durationz)
 
 #factorizing the Phonation column
-slz_rf$Phonation <- factor(slz_rf$Phonation, levels = c("modal", 
-                                                        "breathy", 
-                                                        "checked", 
-                                                        "rearticulated"))
-
 slz_rf_dur$Phonation <- factor(slz_rf_dur$Phonation, levels = c("modal",
                                                                 "breathy",
                                                                 "checked",
@@ -91,46 +62,38 @@ slz_rf_dur$Phonation <- factor(slz_rf_dur$Phonation, levels = c("modal",
 
 # Splitting the data into training and test sets
 set.seed(123) # needed for reproducibility
-
-split_strat  <- initial_split(slz_rf, prop = 0.7, 
-                              strata = "Phonation")
-rf_train  <- training(split_strat)
-rf_test   <- testing(split_strat)
-
-set.seed(123) # needed for reproducibility
-split_strat_dur  <- initial_split(slz_rf_dur, prop = 0.7, 
+split_strat_dur  <- rsample::initial_split(slz_rf_dur, prop = 0.7, 
                                   strata = "Phonation")
-rf_train_dur  <- training(split_strat_dur)
-rf_test_dur   <- testing(split_strat_dur)
+rf_train_dur  <- rsample::training(split_strat_dur)
+rf_test_dur   <- rsample::testing(split_strat_dur)
 
 # number of features
-n_features <- length(setdiff(names(rf_train), "Phonation"))
 n_features_dur <- length(setdiff(names(rf_train_dur), "Phonation"))
 
 # train a default rf model
-rf_model_default <- ranger(Phonation ~ ., 
-                   data = rf_train, 
-                   num.trees = n_features * 100, 
-                   mtry = floor(sqrt(n_features)), 
-                   respect.unordered.factors = "order",
-                   seed = 123)
+rf_duration_default <- ranger::ranger(Phonation ~ ., 
+                           data = rf_train_dur, 
+                           num.trees = n_features_dur * 100, 
+                           mtry = floor(sqrt(n_features)), 
+                           respect.unordered.factors = "order",
+                           seed = 123)
 
-default_rmse <- rf_model_default$prediction.error
+default_error <- rf_duration_default$prediction.error
 
 # hyperparameter tuning
-hyper_grid <- expand.grid(
-  mtry = floor(n_features * c(.05, .15, .2, .25, .333, .4, 1)), 
+hyper_grid_duration <- expand.grid(
+  mtry = floor(n_features_dur * c(.05, .15, .2, .25, .333, .4, 1)), 
   min.node.size = c(1, 3, 5, 10), 
   replace = c(TRUE, FALSE), 
   sample.fraction = c(.5, .63, .8), 
-  rmse = NA )
+  error = NA )
 
 # execute full cartesian grid search
-for (i in seq_len(nrow(hyper_grid))) {
+for (i in seq_len(nrow(hyper_grid_duration))) {
   # fit the model with i-th hyperparameter combination
   fit <- ranger(Phonation ~ ., 
-                data = rf_train, 
-                num.trees = n_features * 100, 
+                data = rf_train_dur, 
+                num.trees = n_features_dur * 100, 
                 mtry = hyper_grid$mtry[i], 
                 min.node.size = hyper_grid$min.node.size[i], 
                 replace = hyper_grid$replace[i], 
@@ -139,19 +102,20 @@ for (i in seq_len(nrow(hyper_grid))) {
                 seed = 123)
   
   # export OOB RMSE
-  hyper_grid$rmse[i] <- fit$prediction.error
+  hyper_grid_duration$error[i] <- fit$prediction.error
 } 
 
 # assessing the model parameters
-hyper_grid %>%
-  arrange(rmse) %>%
-  mutate(perc_gain = (default_rmse - rmse) / default_rmse * 100) %>%
-  head(10)
+hyper_grid_duration %>%
+  dplyr::arrange(error) %>%
+  dplyr::mutate(perc_gain = (default_error - error) / default_error * 100) %>%
+  head(10) %>%
+  xtable::xtable(digits = 3)
 
 # plotting the OOOB RMSE
-hyper_grid_plotting <- expand.grid(
-  num.trees = seq(50, 2100, 50),
-  mtry = floor(n_features * c(.05, .15, .2, .25, .333, .4, 1)), 
+hyper_grid_plotting_duration <- expand.grid(
+  num.trees = seq(50, 2200, 50),
+  mtry = floor(n_features_dur * c(.05, .15, .2, .25, .333, .4, 1)), 
   # min.node.size = c(1, 3, 5, 10), 
   # replace = c(TRUE, FALSE), 
   # sample.fraction = c(.5, .63, .8), 
@@ -159,68 +123,77 @@ hyper_grid_plotting <- expand.grid(
 )
 
 # execute full cartesian grid search for plotting
-for (i in seq_len(nrow(hyper_grid_plotting))) {
+for (i in seq_len(nrow(hyper_grid_plotting_duration))) {
   # fit the model with i-th hyperparameter combination
-  fit_plotting <- ranger(
+  fit_plotting <- ranger::ranger(
     formula = Phonation ~ ., 
-    data = rf_train,
-    num.trees = hyper_grid_plotting$num.trees[i], 
-    mtry = hyper_grid_plotting$mtry[i], 
+    data = rf_train_dur,
+    num.trees = hyper_grid_plotting_duration$num.trees[i], 
+    mtry = hyper_grid_plotting_duration$mtry[i], 
     min.node.size = 1,
-    replace = FALSE,
+    replace = TRUE,
     sample.fraction = 0.80, 
     respect.unordered.factors = "order",
     seed = 123)
   
   # export OOB RMSE
-  hyper_grid_plotting$accuracy[i] <- fit_plotting$prediction.error
+  hyper_grid_plotting_duration$accuracy[i] <- fit_plotting$prediction.error
 } 
 
-hyper_grid_plotting %>%
+tree_num_dur <- hyper_grid_plotting_duration %>%
   ggplot(aes(x = num.trees, y = accuracy, color = factor(mtry))) +
-  geom_line() +
+  geom_line(linewidth = 1) +
+  # geom_line(aes(linetype = factor(mtry)), linewidth = 1) +
   labs(title = "Prediction error for Random Forest Hyperparameter Tuning", 
        x = "number of trees", 
        y = "% incorrect", 
        color = "mtry") +
+  scale_color_manual(values = colorblind) +
   theme_bw()
+tree_num_dur
 
-hyper_grid_plotting %>%
-  arrange(accuracy) %>%
+# save this plot as an .eps file
+ggplot2::ggsave(filename = here::here("figs", "tree_num_dur.eps"),
+       plot = tree_num_dur,
+       width = 6, height = 4, dpi = 300, units = "in")
+
+hyper_grid_plotting_duration %>%
+  dplyr::arrange(accuracy) %>%
   mutate(perc_gain = (default_rmse - accuracy) / default_rmse * 100) %>%
   head(10)
 
 # Final model with best hyperparameters
-final_rf_model <- ranger(Phonation ~ ., 
-                          data = rf_train, 
-                          num.trees = 2000, 
-                          mtry = 3, 
-                          min.node.size = 1, 
-                          replace = FALSE, 
-                          sample.fraction = .8, 
-                          respect.unordered.factors = "order",
-                          seed = 123,
+rf_duration_final <- ranger::ranger(Phonation ~ ., 
+                         data = rf_train_dur, 
+                         num.trees = 300, 
+                         mtry = 5, 
+                         min.node.size = 1, 
+                         replace = TRUE, 
+                         sample.fraction = .8, 
+                         respect.unordered.factors = "order",
+                         seed = 123,
                          classification = TRUE,  # Specify that it's a classification problem
                          importance = 'impurity',  # To measure feature importance
                          probability = TRUE  # To get probabilities for each class
-                         )
-final_rf_model
+)
+rf_duration_final
 
-(rf_predictions <- final_rf_model$confusion.matrix)
+
+(rf_dur_predictions <- rf_duration_final$confusion.matrix)
 
 # Make predictions on the test set
-predictions <-  predict(final_rf_model, data = rf_test)
+dur_predictions <-  predict(rf_duration_final, data = rf_test_dur)
 
 # Extract the predicted classes
-predicted_classes <- apply(predictions$predictions, 1, which.max)
-predicted_classes <- colnames(predictions$predictions)[predicted_classes]
+dur_predicted_classes <- apply(dur_predictions$predictions, 1, which.max)
+dur_predicted_classes <- colnames(dur_predictions$predictions)[dur_predicted_classes]
 
 # Evaluate model performance
-accuracy <- mean(predicted_classes == rf_test$Phonation)
-print(paste("Accuracy:", accuracy))
+dur_accuracy <- mean(dur_predicted_classes == rf_test_dur$Phonation)
+print(paste("Accuracy:", dur_accuracy))
 
 #Variable importance
-rf_var_imp <- vip::vip(final_rf_model, num_features = 21, 
+rf_dur_vip <- vip::vip(rf_duration_final, num_features = 22, 
                        geom = "point",
                        bar = FALSE,
                        aesthetics = list(size = 3),
@@ -228,13 +201,13 @@ rf_var_imp <- vip::vip(final_rf_model, num_features = 21,
 )
 
 # re-run model with impurity-based variable importance
-rf_impurity <- ranger(
+rf_dur_impurity <- ranger::ranger(
   formula = Phonation ~ ., 
-  data = rf_train, 
-  num.trees = 2000, 
-  mtry = 3, 
+  data = rf_train_dur, 
+  num.trees = 300, 
+  mtry = 5, 
   min.node.size = 1, 
-  replace = FALSE, 
+  replace = TRUE, 
   sample.fraction = .8, 
   respect.unordered.factors = "order",
   seed = 123, 
@@ -242,13 +215,13 @@ rf_impurity <- ranger(
   importance = "impurity"
 )
 
-rf_impurity_plotting <- ranger(
+rf_dur_impurity_plotting <- ranger::ranger(
   formula = Phonation ~ ., 
-  data = rf_train, 
-  num.trees = 2000, 
-  mtry = 3, 
+  data = rf_train_dur, 
+  num.trees = 300, 
+  mtry = 5, 
   min.node.size = 1, 
-  replace = FALSE, 
+  replace = TRUE, 
   sample.fraction = .8, 
   respect.unordered.factors = "order",
   seed = 123, 
@@ -257,13 +230,13 @@ rf_impurity_plotting <- ranger(
 )
 
 # re-run model with permutation-based variable importance
-rf_permutation <- ranger(
+rf_dur_permutation <- ranger::ranger(
   formula = Phonation ~ ., 
-  data = rf_train, 
-  num.trees = 2000, 
-  mtry = 3, 
+  data = rf_train_dur, 
+  num.trees = 300, 
+  mtry = 5, 
   min.node.size = 1, 
-  replace = FALSE, 
+  replace = TRUE, 
   sample.fraction = .8, 
   respect.unordered.factors = "order",
   seed = 123, 
@@ -271,13 +244,13 @@ rf_permutation <- ranger(
   importance = "permutation"
 )
 
-rf_permutation_plotting <- ranger(
+rf_dur_permutation_plotting <- ranger::ranger(
   formula = Phonation ~ ., 
-  data = rf_train, 
-  num.trees = 2000, 
-  mtry = 3, 
+  data = rf_train_dur, 
+  num.trees = 300, 
+  mtry = 5, 
   min.node.size = 1, 
-  replace = FALSE, 
+  replace = TRUE, 
   sample.fraction = .8, 
   respect.unordered.factors = "order",
   seed = 123, 
@@ -285,63 +258,65 @@ rf_permutation_plotting <- ranger(
   importance = "permutation"
 )
 
-p1 <- vip::vip(rf_impurity, num_features = 21, 
+p1 <- vip::vip(rf_dur_impurity, num_features = 21, 
                geom = "point",
                bar = FALSE,
                aesthetics = list(size = 3),
                include_type = TRUE
 )
 
-p2 <- vip::vip(rf_permutation, num_features = 21,
+p2 <- vip::vip(rf_dur_permutation, num_features = 21,
                geom = "point",
                bar = FALSE,
                aesthetics = list(size = 3),
                include_type = TRUE
 )
 
-rf_output <- gridExtra::grid.arrange(p1, p2, nrow = 1)
+rf_dur_output <- gridExtra::grid.arrange(p1, p2, nrow = 1)
 
 # Extract variable importance scores for impurity-based importance
-rf_impurity_scores <- vip::vi(rf_impurity_plotting)
+rf_dur_impurity_scores <- vip::vi(rf_dur_impurity_plotting)
 
 # Extract variable importance scores for permutation-based importance
-rf_permutation_scores <- vip::vi(rf_permutation_plotting)
+rf_dur_permutation_scores <- vip::vi(rf_dur_permutation_plotting)
 
 # Create a Lollipop chart of variable importance scores
-rf_impurity_plot <- ggplot(rf_impurity_scores, aes(x = reorder(Variable,
-                                                         Importance), y = Importance)) +
+rf_dur_impurity_plot <- ggplot2::ggplot(rf_dur_impurity_scores, aes(x = reorder(Variable,
+                                                               Importance), y = Importance)) +
   geom_segment(aes(xend = Variable, yend = 0)) +
   geom_point(size = 2) +
   coord_flip() +
-  labs(title = "Random Forest Variable Importance Plot", 
+  labs(title = "Impurity Importance", 
        x = "Variable", 
        y = "Importance (Impurity)") +
   theme_bw()
-rf_impurity_plot
+rf_dur_impurity_plot
 
-rf_permutation_plot <- ggplot(rf_permutation_scores, aes(x = reorder(Variable,
-                                                               Importance),
+rf_dur_permutation_plot <- ggplot2::ggplot(rf_dur_permutation_scores, aes(x = reorder(Variable,
+                                                                     Importance),
                                                          y = Importance)) +
   geom_segment(aes(xend = Variable, yend = 0)) +
   geom_point(size = 2) +
   coord_flip() +
-  labs(title = "Random Forest Variable Importance Plot", 
+  labs(title = "Permutation Importance", 
        x = "Variable", 
        y = "Importance (Permutation)") +
   theme_bw()
-rf_permutation_plot
+rf_dur_permutation_plot
 
-rf_plot <- cowplot::plot_grid(rf_impurity_plot, rf_permutation_plot, nrow = 1)
+rf_dur_plot <- cowplot::plot_grid(rf_dur_impurity_plot, rf_dur_permutation_plot, nrow = 1)
+
+# rf_dur_impurity_plot + rf_dur_permutation_plot
 
 # Save the plots as .eps files
-ggsave(filename = "figs/rf_output.eps",
-       plot = rf_plot,
+ggplot2::ggsave(filename = here::here("figs", "rf_dur_plots.eps"),
+       plot = rf_dur_plot,
        width = 6, height = 4, dpi = 300, units = "in")
 
-ggsave(filename = "figs/rf_impurity_plot.eps",
-       plot = rf_impurity_plot,
+ggplot2::ggsave(filename = here::here("figs", "rf_dur_impurity_plot.eps"),
+       plot = rf_dur_impurity_plot,
        width = 6, height = 4, dpi = 300, units = "in")
 
-ggsave(filename = "figs/rf_permutation_plot.eps",
-       plot = rf_permutation_plot,
+ggplot2::ggsave(filename = here::here("figs", "rf_dur_permutation_plot.eps"),
+       plot = rf_dur_permutation_plot,
        width = 6, height = 4, dpi = 300, units = "in")

@@ -10,8 +10,9 @@
 
 ### install packages if not yet installed
 packages <- c("lme4","tidyverse","viridis", "rsample", "caret", "rpart", 
-              "ipred", "here", "reshape2", "vip", "randomForest", "xtable", 
-              "vegan", "dbarts", "plotrix")
+              "ipred", "here", "reshape2", "vip", "randomForest","xtable", 
+              "vegan", "dbarts", "plotrix", "mgcv", "itsadug", "cowplot",
+              "plotly")
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
   install.packages(setdiff(packages, rownames(installed.packages())))  
 }
@@ -26,6 +27,8 @@ library(ipred)       # for fitting bagged decision trees
 library(vip)  # for feature interpretation
 library(dbarts) # for modeling with BART
 library(vegan) # For MDS analysis
+library(mgcv) # For GAM modeling
+library(itsadug) # For GAM modeling
 
 # Helper packages
 library(tidyverse) # for data manipulation, graphic, and data wrangling
@@ -33,7 +36,9 @@ library(viridis) # for colorblind friendly colors in ggplot
 library(here)   # for creating pathways relative to the top-level directory
 library(reshape2) # for data manipulation
 library(xtable) # For creating Latex tables
-library(plotrix) # For creating pie charts
+library(plotrix) # For functions for st.error and st.dev
+library(cowplot) # For creating complex plots
+library(plotly) # For creating interactive 3D-plots
 
 # Loading the data
 slz <- read.csv(here("data/raw/", "Voice_Master_Split.csv"))
