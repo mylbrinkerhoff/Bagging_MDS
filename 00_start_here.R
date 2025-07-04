@@ -9,22 +9,39 @@
 #-------------------------------------------------------------------------------
 
 ### install packages if not yet installed
-packages <- c("lme4","tidyverse","viridis", "rsample", "caret", "rpart", 
-              "ipred", "here", "reshape2", "vip", "randomForest","xtable", 
-              "vegan", "dbarts", "plotrix", "mgcv", "itsadug", "cowplot",
-              "plotly")
+packages <- c(
+  "lme4",
+  "tidyverse",
+  "viridis",
+  "rsample",
+  "caret",
+  "rpart",
+  "ipred",
+  "here",
+  "reshape2",
+  "vip",
+  "randomForest",
+  "xtable",
+  "vegan",
+  "dbarts",
+  "plotrix",
+  "mgcv",
+  "itsadug",
+  "cowplot",
+  "plotly"
+)
 if (length(setdiff(packages, rownames(installed.packages()))) > 0) {
-  install.packages(setdiff(packages, rownames(installed.packages())))  
+  install.packages(setdiff(packages, rownames(installed.packages())))
 }
 
 # Modeling process packages
-library(lme4)   # for creating residual H1*     
-library(rsample)   # for resampling procedures
-library(caret)     # for resampling and model training
-library(randomForest)     # for tree generation
-library(rpart)       # for fitting decision trees
-library(ipred)       # for fitting bagged decision trees
-library(vip)  # for feature interpretation
+library(lme4) # for creating residual H1*
+library(rsample) # for resampling procedures
+library(caret) # for resampling and model training
+library(randomForest) # for tree generation
+library(rpart) # for fitting decision trees
+library(ipred) # for fitting bagged decision trees
+library(vip) # for feature interpretation
 library(dbarts) # for modeling with BART
 library(vegan) # For MDS analysis
 library(mgcv) # For GAM modeling
@@ -33,7 +50,7 @@ library(itsadug) # For GAM modeling
 # Helper packages
 library(tidyverse) # for data manipulation, graphic, and data wrangling
 library(viridis) # for colorblind friendly colors in ggplot
-library(here)   # for creating pathways relative to the top-level directory
+library(here) # for creating pathways relative to the top-level directory
 library(reshape2) # for data manipulation
 library(xtable) # For creating Latex tables
 library(plotrix) # For functions for st.error and st.dev

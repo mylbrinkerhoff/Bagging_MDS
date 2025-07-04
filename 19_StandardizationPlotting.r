@@ -46,21 +46,18 @@ slz_plot <- slz_plot %>%
     min.soe = min(log.soe),
   ) %>%
   mutate(norm.soe = (log.soe - min.soe) / (max.soe - min.soe), ) %>%
-  select(-c(log.soe,
-    m.log.soe,
-    sd.log.soe,
-    z.log.soe,
-    max.soe,
-    min.soe
-  )) %>%
+  select(-c(log.soe, m.log.soe, sd.log.soe, z.log.soe, max.soe, min.soe)) %>%
   ungroup()
 
 ### Calculating Residual h1
 #### Generate the lmer model for residual h1
-model_position_h1c_covariant_plot <- lmer(h1cz ~ energyz + 
-                                       (energyz||Speaker),
-                                     data = slz_plot,
-                                     REML = FALSE)
+model_position_h1c_covariant_plot <- lmer(
+  h1cz ~
+    energyz +
+      (energyz || Speaker),
+  data = slz_plot,
+  REML = FALSE
+)
 
 #### extract the energy factor
 energy_factor_plot <- fixef(model_position_h1c_covariant_plot)[2]
@@ -69,7 +66,9 @@ energy_factor_plot <- fixef(model_position_h1c_covariant_plot)[2]
 slz_plot$H1c_resid = slz_plot$h1cz - slz_plot$energyz * energy_factor_plot
 
 
-write.csv(slz_plot,
-  file = "data/interim/slz_plot_standardized.csv", row.names = F,
+write.csv(
+  slz_plot,
+  file = "data/interim/slz_plot_standardized.csv",
+  row.names = F,
   fileEncoding = "UTF-8"
 )
